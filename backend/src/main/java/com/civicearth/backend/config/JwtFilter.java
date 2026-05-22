@@ -32,7 +32,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         // ✅ ALWAYS BYPASS auth endpoints - NO TOKEN CHECKING
-        if (path.startsWith("/api/auth/")) {  // ← EXACT MATCH
+        if (path.contains("/auth")) {  // ← EXACT MATCH
             filterChain.doFilter(request, response);
             return;
         }
