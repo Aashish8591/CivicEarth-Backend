@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 @Service
 public class PostService {
@@ -31,6 +32,19 @@ public class PostService {
 
         if (post.getComments() == null) {
             post.setComments(new ArrayList<>());
+        }
+
+        // fix null fields
+        if (post.getCategory() == null) {
+            post.setCategory("");
+        }
+
+        if (post.getLocation() == null) {
+            post.setLocation("");
+        }
+
+        if (post.getDepartment() == null) {
+            post.setDepartment("");
         }
 
         post.setCreatedAt(new Date());
@@ -60,15 +74,15 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        // fix null issue (VERY IMPORTANT)
+        // fix null issue
         if (post.getLikes() == null) {
             post.setLikes(new ArrayList<>());
         }
 
         if (post.getLikes().contains(userId)) {
-            post.getLikes().remove(userId); // unlike
+            post.getLikes().remove(userId);
         } else {
-            post.getLikes().add(userId); // like
+            post.getLikes().add(userId);
         }
 
         return postRepository.save(post);
@@ -80,23 +94,16 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        // fix null issue (VERY IMPORTANT)
         if (post.getComments() == null) {
             post.setComments(new ArrayList<>());
         }
 
         post.getComments().add(comment);
 
-
         return postRepository.save(post);
     }
 
-
-//    public List<Post> getPostsByUser(String userId) {
-//        return postRepository.findByUserId(userId);
-//    }
-
-
+    // GET POSTS BY USER
     public List<Map<String, Object>> getPostsByUser(String userId) {
 
         List<Post> posts = postRepository.findByUserId(userId);
@@ -106,26 +113,38 @@ public class PostService {
             User user = userRepository.findById(post.getUserId())
                     .orElse(null);
 
-            return Map.of(
-                    "id", post.getId(),
-                    "content", post.getContent(),
-                    "imageUrl", post.getImageUrl(),
-                    "location", post.getLocation(),
-                    "category", post.getCategory(),
-                    "status", post.getStatus(),
-                    "createdAt", post.getCreatedAt(),
-                    "likes", post.getLikes(),
-                    "comments", post.getComments(),
+            Map<String, Object> response = new HashMap<>();
 
-                    "user", user != null ? Map.of(
-                            "id", user.getId(),
-                            "fullName", user.getFullName(),
-                            "profilePic", user.getProfilePic()
-                    ) : null
-            );
+            response.put("id", post.getId());
+            response.put("content", post.getContent());
+            response.put("imageUrl", post.getImageUrl());
+            response.put("location", post.getLocation());
+            response.put("category", post.getCategory());
+            response.put("status", post.getStatus());
+            response.put("createdAt", post.getCreatedAt());
+            response.put("likes", post.getLikes());
+            response.put("comments", post.getComments());
+
+            if (user != null) {
+
+                Map<String, Object> userMap = new HashMap<>();
+
+                userMap.put("id", user.getId());
+                userMap.put("fullName", user.getFullName());
+                userMap.put("profilePic", user.getProfilePic());
+
+                response.put("user", userMap);
+
+            } else {
+                response.put("user", null);
+            }
+
+            return response;
+
         }).toList();
     }
 
+    // GET POSTS BY DEPARTMENT
     public List<Map<String, Object>> getByDepartment(String department) {
 
         List<Post> posts = postRepository.findByDepartment(department);
@@ -135,27 +154,40 @@ public class PostService {
             User user = userRepository.findById(post.getUserId())
                     .orElse(null);
 
-            return Map.of(
-                    "id", post.getId(),
-                    "content", post.getContent(),
-                    "imageUrl", post.getImageUrl(),
-                    "location", post.getLocation(),
-                    "category", post.getCategory(),
-                    "status", post.getStatus(),
-                    "createdAt", post.getCreatedAt(),
-                    "likes", post.getLikes(),
-                    "comments", post.getComments(),
+            Map<String, Object> response = new HashMap<>();
 
-                    "user", user != null ? Map.of(
-                            "id", user.getId(),
-                            "fullName", user.getFullName(),
-                            "profilePic", user.getProfilePic()
-                    ) : null
-            );
+            response.put("id", post.getId());
+            response.put("content", post.getContent());
+            response.put("imageUrl", post.getImageUrl());
+            response.put("location", post.getLocation());
+            response.put("category", post.getCategory());
+            response.put("status", post.getStatus());
+            response.put("createdAt", post.getCreatedAt());
+            response.put("likes", post.getLikes());
+            response.put("comments", post.getComments());
+
+            if (user != null) {
+
+                Map<String, Object> userMap = new HashMap<>();
+
+                userMap.put("id", user.getId());
+                userMap.put("fullName", user.getFullName());
+                userMap.put("profilePic", user.getProfilePic());
+
+                response.put("user", userMap);
+
+            } else {
+                response.put("user", null);
+            }
+
+            return response;
+
         }).toList();
     }
 
+    // UPDATE STATUS
     public Post updateStatus(String id, Map<String, String> data) {
+
         Post post = getById(id);
 
         post.setStatus(data.get("status"));
@@ -165,28 +197,42 @@ public class PostService {
         return postRepository.save(post);
     }
 
+    // GET ALL POSTS WITH USER
     public List<Map<String, Object>> getAllWithUser() {
+
         List<Post> posts = postRepository.findAll();
 
         return posts.stream().map(post -> {
-            User user = userRepository.findById(post.getUserId()).orElse(null);
 
-            return Map.of(
-                    "id", post.getId(),
-                    "content", post.getContent(),
-                    "imageUrl", post.getImageUrl(),
-                    "location", post.getLocation(),
-                    "category", post.getCategory(),
-                    "status", post.getStatus(),
-                    "createdAt", post.getCreatedAt(),
+            User user = userRepository.findById(post.getUserId())
+                    .orElse(null);
 
-                    // 🔥 SAFE USER DATA ONLY
-                    "user", user != null ? Map.of(
-                            "id", user.getId(),
-                            "fullName", user.getFullName(),
-                            "profilePic", user.getProfilePic()
-                    ) : null
-            );
+            Map<String, Object> response = new HashMap<>();
+
+            response.put("id", post.getId());
+            response.put("content", post.getContent());
+            response.put("imageUrl", post.getImageUrl());
+            response.put("location", post.getLocation());
+            response.put("category", post.getCategory());
+            response.put("status", post.getStatus());
+            response.put("createdAt", post.getCreatedAt());
+
+            if (user != null) {
+
+                Map<String, Object> userMap = new HashMap<>();
+
+                userMap.put("id", user.getId());
+                userMap.put("fullName", user.getFullName());
+                userMap.put("profilePic", user.getProfilePic());
+
+                response.put("user", userMap);
+
+            } else {
+                response.put("user", null);
+            }
+
+            return response;
+
         }).toList();
     }
 }
