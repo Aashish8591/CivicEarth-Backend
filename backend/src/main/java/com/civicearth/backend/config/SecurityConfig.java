@@ -112,15 +112,14 @@ public class SecurityConfig {
 
         configuration.setAllowCredentials(true);
 
-        // ✅ Local frontend
-        configuration.addAllowedOrigin("http://localhost:5173");
+        // ✅ Allow ALL frontend origins
+        configuration.setAllowedOriginPatterns(java.util.List.of("*"));
 
-        // ✅ Live frontend (CHANGE TO YOUR REAL VERCEL URL)
-        configuration.addAllowedOrigin("https://civic-earth.vercel.app");
+        configuration.setAllowedHeaders(java.util.List.of("*"));
 
-        configuration.addAllowedHeader("*");
+        configuration.setAllowedMethods(java.util.List.of("*"));
 
-        configuration.addAllowedMethod("*");
+        configuration.setExposedHeaders(java.util.List.of("Authorization"));
 
         org.springframework.web.cors.UrlBasedCorsConfigurationSource source =
                 new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
