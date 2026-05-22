@@ -1,0 +1,4 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://aashishpatil2144_db_user:Aashish%402004@cluster0.hgkxvm7.mongodb.net/civicearth?retryWrites=true&w=majority
